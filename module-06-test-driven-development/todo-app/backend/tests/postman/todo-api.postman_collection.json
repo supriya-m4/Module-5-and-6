@@ -1,0 +1,135 @@
+{
+  "info": {
+    "_postman_id": "2c3f5f0a-6d34-4a90-b26b-8c74ec5b7d51",
+    "name": "ToDo API Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET /tasks returns JSON array",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/tasks",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "tasks"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('response is a JSON array', function () {",
+              "  pm.response.to.be.json;",
+              "  const body = pm.response.json();",
+              "  pm.expect(Array.isArray(body)).to.eql(true);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "POST /tasks requires title",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"notes\":\"Missing title should fail\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/tasks",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "tasks"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 400 when title is missing', function () {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test('response returns validation error message', function () {",
+              "  pm.response.to.be.json;",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.error).to.eql('Task title is required.');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "PATCH /tasks/:id/complete returns 404 for missing IDs",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/tasks/{{missingTaskId}}/complete",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "tasks",
+            "{{missingTaskId}}",
+            "complete"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status is 404 for an unknown task id', function () {",
+              "  pm.response.to.have.status(404);",
+              "});",
+              "",
+              "pm.test('response returns task not found error', function () {",
+              "  pm.response.to.be.json;",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.error).to.eql('Task not found.');",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5100"
+    },
+    {
+      "key": "missingTaskId",
+      "value": "missing-task-id"
+    }
+  ]
+}
